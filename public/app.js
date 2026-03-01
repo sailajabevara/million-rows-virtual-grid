@@ -1,50 +1,51 @@
-let data=[];
-
-const ROW_HEIGHT=40;
-
-const container=
-document.getElementById("container");
-
-const windowEl=
-document.getElementById("window");
-
-const sizer=
-document.getElementById("sizer");
 
 
-const fpsEl=
-document.querySelector(
-'[data-test-id="debug-fps"]'
-);
+let data = [];
+let originalData = [];
 
-const rowsEl=
-document.querySelector(
-'[data-test-id="debug-rendered-rows"]'
-);
+let sortAsc = true;
 
-const posEl=
-document.querySelector(
-'[data-test-id="debug-scroll-position"]'
-);
+/* SELECTED ROW STORAGE */
+let selectedRowId = null;
+
+const ROW_HEIGHT = 40;
+
+const container = document.getElementById("container");
+const windowEl = document.getElementById("window");
+const sizer = document.getElementById("sizer");
+
+const fpsEl =
+document.querySelector('[data-test-id="debug-fps"]');
+
+const rowsEl =
+document.querySelector('[data-test-id="debug-rendered-rows"]');
+
+const posEl =
+document.querySelector('[data-test-id="debug-scroll-position"]');
 
 
+/* LOAD DATA */
 
 fetch("transactions.json")
 .then(r=>r.json())
 .then(d=>{
 
 data=d;
+originalData=d;
 
 init();
+
+setupSorting();
+setupFiltering();
+setupQuickFilters();
 
 });
 
 
-
 function init(){
 
-sizer.style.height=
-data.length*ROW_HEIGHT+"px";
+sizer.style.height =
+data.length * ROW_HEIGHT + "px";
 
 render();
 
@@ -52,32 +53,30 @@ render();
 
 
 
+/* RENDER GRID */
+
 function render(){
 
-const scrollTop=
+const scrollTop =
 container.scrollTop;
 
-const height=
+const height =
 container.clientHeight;
 
-
-const startIndex=
+const startIndex =
 Math.floor(scrollTop/ROW_HEIGHT);
 
-
-const visible=
+const visible =
 Math.ceil(height/ROW_HEIGHT);
 
-
-const endIndex=
+const endIndex =
 startIndex+visible+5;
 
-
-const rows=
+const rows =
 data.slice(startIndex,endIndex);
 
 
-windowEl.style.transform=
+windowEl.style.transform =
 `translateY(${startIndex*ROW_HEIGHT}px)`;
 
 
@@ -86,7 +85,7 @@ windowEl.innerHTML="";
 
 rows.forEach(row=>{
 
-const div=
+const div =
 document.createElement("div");
 
 div.className="row";
@@ -95,6 +94,24 @@ div.setAttribute(
 "data-test-id",
 "virtual-row-"+row.id
 );
+
+
+/* SHOW SELECTED ROW */
+
+if(row.id===selectedRowId){
+div.setAttribute("data-selected","true");
+}
+
+
+/* CLICK EVENT */
+
+div.onclick=()=>{
+
+selectedRowId=row.id;
+
+render();
+
+};
 
 
 div.innerHTML=`
@@ -116,8 +133,7 @@ windowEl.appendChild(div);
 });
 
 
-rowsEl.innerText=
-rows.length;
+rowsEl.innerText=rows.length;
 
 posEl.innerText=
 `Row ${startIndex} / ${data.length}`;
@@ -126,12 +142,167 @@ posEl.innerText=
 
 
 
+/* SCROLL */
+
 container.addEventListener(
 "scroll",
 ()=>requestAnimationFrame(render)
 );
 
 
+
+/* SORTING */
+
+function setupSorting(){
+
+const header=
+document.querySelector(
+'[data-test-id="header-amount"]'
+);
+
+header.onclick=()=>{
+
+if(sortAsc){
+
+data.sort(
+(a,b)=>a.amount-b.amount
+);
+
+}else{
+
+data.sort(
+(a,b)=>b.amount-a.amount
+);
+
+}
+
+sortAsc=!sortAsc;
+
+container.scrollTop=0;
+
+render();
+
+};
+
+}
+
+
+
+/* FILTER */
+
+function setupFiltering(){
+
+const input=
+document.querySelector(
+'[data-test-id="filter-merchant"]'
+);
+
+const countEl=
+document.querySelector(
+'[data-test-id="filter-count"]'
+);
+
+input.oninput=(e)=>{
+
+const value=
+e.target.value.toLowerCase();
+
+
+data=
+originalData.filter(x=>
+x.merchant.toLowerCase()
+.includes(value)
+);
+
+
+countEl.innerText=
+`Showing ${data.length} of 1000000 rows`;
+
+container.scrollTop=0;
+
+render();
+
+};
+
+}
+
+
+
+/* QUICK FILTER */
+
+function setupQuickFilters(){
+
+const completedBtn=
+document.querySelector(
+'[data-test-id="quick-filter-Completed"]'
+);
+
+const pendingBtn=
+document.querySelector(
+'[data-test-id="quick-filter-Pending"]'
+);
+
+const resetBtn=
+document.getElementById("resetFilter");
+
+const countEl=
+document.querySelector(
+'[data-test-id="filter-count"]'
+);
+
+
+completedBtn.onclick=()=>{
+
+data=
+originalData.filter(x=>
+x.status==="Completed"
+);
+
+countEl.innerText=
+`Showing ${data.length} of 1000000 rows`;
+
+container.scrollTop=0;
+
+render();
+
+};
+
+
+pendingBtn.onclick=()=>{
+
+data=
+originalData.filter(x=>
+x.status==="Pending"
+);
+
+countEl.innerText=
+`Showing ${data.length} of 1000000 rows`;
+
+container.scrollTop=0;
+
+render();
+
+};
+
+
+resetBtn.onclick=()=>{
+
+data=originalData;
+
+countEl.innerText=
+`Showing 1000000 of 1000000 rows`;
+
+container.scrollTop=0;
+
+render();
+
+};
+
+}
+
+
+
+/* FPS */
 
 let last=performance.now();
 

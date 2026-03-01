@@ -13,63 +13,62 @@ margin:20px;
 }
 
 #container{
-
 height:600px;
-
 overflow-y:scroll;
-
 border:1px solid black;
-
 position:relative;
-
 }
 
 #sizer{
-
 position:absolute;
-
 width:100%;
-
 }
 
 #window{
-
 position:absolute;
-
 width:100%;
-
 }
 
 .row{
-
 height:40px;
-
 border-bottom:1px solid #ddd;
-
 display:flex;
+cursor:pointer;
+}
 
+/* SELECTED ROW HIGHLIGHT */
+
+.row[data-selected="true"]{
+background:#cce5ff;
 }
 
 .cell{
-
 flex:1;
 padding:5px;
-
 }
 
+.header{
+display:flex;
+font-weight:bold;
+border-bottom:2px solid black;
+background:#eee;
+}
+
+/* FILTER AREA */
+
+.filterBox{
+margin-bottom:10px;
+}
+
+/* DEBUG PANEL */
+
 .debug{
-
 position:fixed;
-
 top:10px;
 right:10px;
-
 background:white;
-
 border:1px solid black;
-
 padding:10px;
-
 }
 
 </style>
@@ -81,13 +80,78 @@ padding:10px;
 <h2>Million Rows Virtual Grid</h2>
 
 
+<!-- FILTER SECTION -->
+
+<div class="filterBox">
+
+<input
+placeholder="Search Merchant"
+data-test-id="filter-merchant">
+
+<br><br>
+
+<div data-test-id="filter-count">
+Showing 1000000 of 1000000 rows
+</div>
+
+<br>
+
+<button data-test-id="quick-filter-Completed">
+Completed
+</button>
+
+<button data-test-id="quick-filter-Pending">
+Pending
+</button>
+
+<button id="resetFilter">
+Reset
+</button>
+
+</div>
+
+
+
+<!-- COLUMN HEADERS -->
+
+<div class="header">
+
+<div class="cell">
+ID
+</div>
+
+<div class="cell">
+Date
+</div>
+
+<div class="cell">
+Merchant
+</div>
+
+<div
+class="cell"
+data-test-id="header-amount"
+style="cursor:pointer">
+
+Amount
+
+</div>
+
+<div class="cell">
+Status
+</div>
+
+</div>
+
+
+
+<!-- GRID -->
+
 <div
 data-test-id="grid-scroll-container"
 id="container">
 
-
 <div id="sizer"></div>
-
 
 <div
 data-test-id="grid-row-window"
@@ -99,6 +163,8 @@ id="window">
 
 
 
+<!-- DEBUG PANEL -->
+
 <div
 class="debug"
 data-test-id="debug-panel">
@@ -107,16 +173,19 @@ FPS:
 
 <div data-test-id="debug-fps"></div>
 
+<br>
+
 Rows Rendered:
 
 <div data-test-id="debug-rendered-rows"></div>
+
+<br>
 
 Scroll Position:
 
 <div data-test-id="debug-scroll-position"></div>
 
 </div>
-
 
 
 <script src="app.js"></script>
