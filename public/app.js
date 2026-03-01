@@ -5,8 +5,8 @@ let originalData = [];
 
 let sortAsc = true;
 
-/* SELECTED ROW STORAGE */
-let selectedRowId = null;
+/* MULTI SELECT STORAGE */
+let selectedRows = new Set();
 
 const ROW_HEIGHT = 40;
 
@@ -96,18 +96,35 @@ div.setAttribute(
 );
 
 
-/* SHOW SELECTED ROW */
+/* SHOW SELECTED */
 
-if(row.id===selectedRowId){
+if(selectedRows.has(row.id)){
 div.setAttribute("data-selected","true");
 }
 
 
 /* CLICK EVENT */
 
-div.onclick=()=>{
+div.onclick=(e)=>{
 
-selectedRowId=row.id;
+// CTRL pressed → multi select
+if(e.ctrlKey){
+
+if(selectedRows.has(row.id)){
+selectedRows.delete(row.id);
+}else{
+selectedRows.add(row.id);
+}
+
+}
+
+// Normal click → single select
+else{
+
+selectedRows.clear();
+selectedRows.add(row.id);
+
+}
 
 render();
 
@@ -163,17 +180,9 @@ document.querySelector(
 header.onclick=()=>{
 
 if(sortAsc){
-
-data.sort(
-(a,b)=>a.amount-b.amount
-);
-
+data.sort((a,b)=>a.amount-b.amount);
 }else{
-
-data.sort(
-(a,b)=>b.amount-a.amount
-);
-
+data.sort((a,b)=>b.amount-a.amount);
 }
 
 sortAsc=!sortAsc;
