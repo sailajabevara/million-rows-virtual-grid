@@ -1,4 +1,5 @@
 
+
 let data=[];
 let originalData=[];
 
@@ -23,7 +24,9 @@ fetch("transactions.json")
 .then(d=>{
 data=d;
 originalData=d;
+
 init();
+
 setupSorting();
 setupFiltering();
 setupQuickFilters();
@@ -62,13 +65,21 @@ rows.forEach((row,index)=>{
 
 const div=document.createElement("div");
 div.className="row";
-div.setAttribute("data-test-id","virtual-row-"+row.id);
 
+div.setAttribute(
+"data-test-id",
+"virtual-row-"+row.id
+);
+
+
+/* Selected rows */
 
 if(selectedRows.has(row.id)){
 div.setAttribute("data-selected","true");
 }
 
+
+/* Row click */
 
 div.onclick=(e)=>{
 
@@ -92,6 +103,8 @@ render();
 };
 
 
+/* ROW HTML */
+
 div.innerHTML=`
 
 <div class="cell id-cell">
@@ -102,8 +115,13 @@ ${row.id}
 ${row.date}
 </div>
 
-<div class="cell merchant-cell">
-${row.merchant}
+<div class="cell merchant-cell"
+data-test-id="cell-${startIndex+index}-merchant">
+
+${editingCell===row.id
+? `<input id="editInput" value="${row.merchant}" />`
+: row.merchant}
+
 </div>
 
 <div class="cell">
@@ -117,19 +135,26 @@ ${row.status}
 `;
 
 
+/* Pin column */
+
 if(pinnedColumns.has("id")){
-div.querySelector(".id-cell").classList.add("pinned-column");
+div.querySelector(".id-cell")
+.classList.add("pinned-column");
 }
 
 
 windowEl.appendChild(div);
 
 
-const merchantCell=div.querySelector(".merchant-cell");
+/* CELL EDITING */
+
+const merchantCell=
+div.querySelector(".merchant-cell");
 
 merchantCell.ondblclick=()=>{
 
 editingCell=row.id;
+
 render();
 
 setTimeout(()=>{
@@ -140,18 +165,30 @@ if(input){
 
 input.focus();
 
+
 input.onkeydown=(ev)=>{
+
 if(ev.key==="Enter"){
+
 row.merchant=input.value;
+
 editingCell=null;
+
 render();
+
 }
+
 };
 
+
 input.onblur=()=>{
+
 row.merchant=input.value;
+
 editingCell=null;
+
 render();
+
 };
 
 }
@@ -171,15 +208,21 @@ posEl.innerText=
 }
 
 
+/* SCROLL */
+
 container.addEventListener(
 "scroll",
 ()=>requestAnimationFrame(render)
 );
 
 
+/* SORTING */
+
 function setupSorting(){
 
-const header=document.querySelector('[data-test-id="header-amount"]');
+const header=document.querySelector(
+'[data-test-id="header-amount"]'
+);
 
 header.onclick=()=>{
 
@@ -200,10 +243,17 @@ render();
 }
 
 
+/* FILTERING */
+
 function setupFiltering(){
 
-const input=document.querySelector('[data-test-id="filter-merchant"]');
-const countEl=document.querySelector('[data-test-id="filter-count"]');
+const input=document.querySelector(
+'[data-test-id="filter-merchant"]'
+);
+
+const countEl=document.querySelector(
+'[data-test-id="filter-count"]'
+);
 
 let timer;
 
@@ -219,7 +269,8 @@ data=originalData.filter(x=>
 x.merchant.toLowerCase().includes(value)
 );
 
-countEl.innerText=`Showing ${data.length} of 1000000 rows`;
+countEl.innerText=
+`Showing ${data.length} of 1000000 rows`;
 
 container.scrollTop=0;
 
@@ -232,20 +283,33 @@ render();
 }
 
 
+/* QUICK FILTER */
+
 function setupQuickFilters(){
 
-const completedBtn=document.querySelector('[data-test-id="quick-filter-Completed"]');
-const pendingBtn=document.querySelector('[data-test-id="quick-filter-Pending"]');
+const completedBtn=document.querySelector(
+'[data-test-id="quick-filter-Completed"]'
+);
+
+const pendingBtn=document.querySelector(
+'[data-test-id="quick-filter-Pending"]'
+);
+
 const resetBtn=document.getElementById("resetFilter");
 
-const countEl=document.querySelector('[data-test-id="filter-count"]');
+const countEl=document.querySelector(
+'[data-test-id="filter-count"]'
+);
 
 
 completedBtn.onclick=()=>{
 
-data=originalData.filter(x=>x.status==="Completed");
+data=originalData.filter(
+x=>x.status==="Completed"
+);
 
-countEl.innerText=`Showing ${data.length} of 1000000 rows`;
+countEl.innerText=
+`Showing ${data.length} of 1000000 rows`;
 
 container.scrollTop=0;
 
@@ -256,9 +320,12 @@ render();
 
 pendingBtn.onclick=()=>{
 
-data=originalData.filter(x=>x.status==="Pending");
+data=originalData.filter(
+x=>x.status==="Pending"
+);
 
-countEl.innerText=`Showing ${data.length} of 1000000 rows`;
+countEl.innerText=
+`Showing ${data.length} of 1000000 rows`;
 
 container.scrollTop=0;
 
@@ -271,7 +338,8 @@ resetBtn.onclick=()=>{
 
 data=originalData;
 
-countEl.innerText=`Showing 1000000 of 1000000 rows`;
+countEl.innerText=
+`Showing 1000000 of 1000000 rows`;
 
 container.scrollTop=0;
 
@@ -282,10 +350,17 @@ render();
 }
 
 
+/* PIN COLUMN */
+
 function setupPinning(){
 
-const pinBtn=document.querySelector('[data-test-id="pin-column-id"]');
-const headerId=document.querySelector('[data-test-id="header-id"]');
+const pinBtn=document.querySelector(
+'[data-test-id="pin-column-id"]'
+);
+
+const headerId=document.querySelector(
+'[data-test-id="header-id"]'
+);
 
 pinBtn.onclick=()=>{
 
@@ -308,11 +383,14 @@ render();
 }
 
 
+/* FPS COUNTER */
+
 let last=performance.now();
 
 function fpsLoop(){
 
 const now=performance.now();
+
 const fps=1000/(now-last);
 
 last=now;
